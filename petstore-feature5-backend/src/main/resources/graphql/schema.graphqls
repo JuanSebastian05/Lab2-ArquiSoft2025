@@ -1,0 +1,101 @@
+# Pet Store GraphQL Schema - Basado en esquema Neon
+
+type Query {
+    # Health check
+    health: String!
+    
+    # Queries de autenticación
+    currentUser: User
+    
+    # Queries de promociones
+    promotions: [Promotion!]!
+    promotionsActive: [Promotion!]!
+    promotionsExpired: [Promotion!]!
+    promotionsScheduled: [Promotion!]!
+    promotionsByStatus(statusName: String!): [Promotion!]!
+    promotionsByCategory(categoryId: ID!): [Promotion!]!
+    promotion(id: ID!): Promotion
+    
+    # Queries de categorías
+    categories: [Category!]!
+    category(id: ID!): Category
+    
+    # Queries de productos
+    products: [Product!]!
+    productsByCategory(categoryId: ID!): [Product!]!
+    product(id: ID!): Product
+}
+
+type Mutation {
+    # Mutaciones de autenticación
+    login(email: String!, password: String!): GraphQLLoginResponse!
+    
+    # Mutaciones de promociones (solo admin)
+    createPromotion(input: PromotionInput!): Promotion!
+    updatePromotion(id: ID!, input: PromotionInput!): Promotion!
+    deletePromotion(id: ID!): Boolean!
+}
+
+type Product {
+    productId: ID!
+    productName: String!
+    basePrice: Float!
+    sku: Int!
+    category: Category!
+    promotion: Promotion
+}
+
+type Category {
+    categoryId: ID!
+    categoryName: String!
+    description: String
+    promotions: [Promotion!]!
+    products: [Product!]!
+}
+
+type Promotion {
+    promotionId: ID!
+    promotionName: String!
+    description: String
+    startDate: String!
+    endDate: String!
+    discountValue: Float!
+    status: Status!
+    user: User
+    category: Category
+    products: [Product!]!
+}
+
+type Status {
+    statusId: ID!
+    statusName: String!
+}
+
+type User {
+    userId: ID!
+    userName: String!
+    email: String!
+    role: Role!
+}
+
+type Role {
+    roleId: ID!
+    roleName: String!
+}
+
+type GraphQLLoginResponse {
+    token: String!
+    user: User
+    success: Boolean!
+}
+
+input PromotionInput {
+    promotionName: String!
+    description: String
+    startDate: String!
+    endDate: String!
+    discountValue: Float!
+    statusId: ID!
+    userId: ID
+    categoryId: ID
+}

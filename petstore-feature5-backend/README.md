@@ -32,6 +32,12 @@ Sistema completo de promociones para petstore con autenticación JWT, API REST y
 - **JPA**: Configuraciones de batch y transacciones mejoradas
 - **Estabilidad**: Sin errores de conexión JDBC en producción
 
+### ✅ **Consultas GraphQL por Estado de Promociones**
+- **Nuevas queries**: `promotionsExpired`, `promotionsScheduled` 
+- **Query flexible**: `promotionsByStatus(statusName: "ACTIVE|EXPIRED|SCHEDULE")`
+- **Paridad REST-GraphQL**: Ahora GraphQL tiene las mismas capacidades que REST
+- **Estados soportados**: ACTIVE (1), EXPIRED (2), SCHEDULE (3)
+
 ### ✅ **Seguridad Mejorada**
 - **Consultas Públicas**: Categorías, productos, promociones sin JWT
 - **Consultas Protegidas**: `currentUser` y mutations requieren JWT real
@@ -556,7 +562,12 @@ Esto permite pruebas fáciles sin configuración adicional.
 | `health` | ❌ Público | Health check |
 | `categories` | ❌ Público | Consultar categorías |
 | `products` | ❌ Público | Consultar productos |
-| `promotions` | ❌ Público | Consultar promociones |
+| `promotions` | ❌ Público | Todas las promociones |
+| `promotionsActive` | ❌ Público | Promociones ACTIVE |
+| `promotionsExpired` | ❌ Público | Promociones EXPIRED |
+| `promotionsScheduled` | ❌ Público | Promociones SCHEDULE |
+| `promotionsByStatus` | ❌ Público | Promociones por estado |
+| `promotionsByCategory` | ❌ Público | Promociones por categoría |
 | `currentUser` | ✅ JWT Requerido | Info del usuario autenticado |
 | `login` | ❌ Público | Generar JWT token |
 | `createPromotion` | ✅ JWT Requerido | Crear promoción |
@@ -601,11 +612,46 @@ query ConsultasBasicas {
     discountValue
   }
   
-  # Solo promociones activas
+  # Solo promociones activas (status: ACTIVE)
   promotionsActive {
     promotionId
     promotionName
     discountValue
+    status {
+      statusName
+    }
+  }
+  
+  # Solo promociones expiradas (status: EXPIRED)
+  promotionsExpired {
+    promotionId
+    promotionName
+    discountValue
+    status {
+      statusName
+    }
+  }
+  
+  # Solo promociones programadas (status: SCHEDULE)
+  promotionsScheduled {
+    promotionId
+    promotionName
+    discountValue
+    startDate
+    endDate
+    status {
+      statusName
+    }
+  }
+  
+  # Promociones por estado específico
+  promotionsByStatus(statusName: "ACTIVE") {
+    promotionId
+    promotionName
+    discountValue
+    status {
+      statusName
+    }
   }
   
   # Promociones por categoría
@@ -1013,23 +1059,89 @@ mutation LoginReal {
 
 ### 🎯 **Casos de Uso Prácticos**
 
-#### **Dashboard de Administración**
+#### **🆕 Consultas por Estado de Promociones**
 ```graphql
-query Dashboard {
-  promotions {
+# Solo promociones activas
+query PromocionesActivas {
+  promotionsActive {
+    promotionId
+    promotionName
+    discountValue
+    startDate
+    endDate
+    status { statusName }
+    category { categoryName }
+  }
+}
+
+# Solo promociones expiradas
+query PromocionesExpiradas {
+  promotionsExpired {
+    promotionId
+    promotionName
+    discountValue
+    endDate
+    status { statusName }
+    category { categoryName }
+  }
+}
+
+# Solo promociones programadas (futuras)
+query PromocionesProgramadas {
+  promotionsScheduled {
+    promotionId
+    promotionName
+    discountValue
+    startDate
+    endDate
+    status { statusName }
+    category { categoryName }
+  }
+}
+
+# Consulta flexible por cualquier estado
+query PromocionePorEstado($estado: String!) {
+  promotionsByStatus(statusName: $estado) {
     promotionId
     promotionName
     discountValue
     status { statusName }
-    category { categoryName }
-    products { productName }
+  }
+}
+```
+
+#### **Dashboard de Administración Completo**
+```graphql
+query DashboardCompleto {
+  # Promociones activas
+  activas: promotionsActive {
+    promotionId
+    promotionName
+    discountValue
+    status { statusName }
   }
   
+  # Promociones expiradas
+  expiradas: promotionsExpired {
+    promotionId
+    promotionName
+    endDate
+    status { statusName }
+  }
+  
+  # Promociones programadas
+  programadas: promotionsScheduled {
+    promotionId
+    promotionName
+    startDate
+    status { statusName }
+  }
+  
+  # Categorías
   categories {
     categoryId
     categoryName
     products { productId }
-    promotions { promotionId }
   }
 }
 ```
@@ -1096,7 +1208,25 @@ Para queries que requieren autenticación, usar JWT real obtenido del login:
 2. Usar el token en header `Authorization: Bearer <token>`
 3. Acceder a queries protegidas como `currentUser`
 
-**Ejemplo con PowerShell**:
+**🆕 Ejemplos PowerShell - Consultas por Estado**:
+```powershell
+# Promociones activas (sin JWT requerido)
+Invoke-WebRequest -Uri "http://localhost:8080/graphql" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"query":"{ promotionsActive { promotionId promotionName discountValue status { statusName } } }"}'
+
+# Promociones expiradas
+Invoke-WebRequest -Uri "http://localhost:8080/graphql" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"query":"{ promotionsExpired { promotionId promotionName endDate status { statusName } } }"}'
+
+# Promociones programadas
+Invoke-WebRequest -Uri "http://localhost:8080/graphql" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"query":"{ promotionsScheduled { promotionId promotionName startDate status { statusName } } }"}'
+
+# Promociones por estado específico
+Invoke-WebRequest -Uri "http://localhost:8080/graphql" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"query":"{ promotionsByStatus(statusName: \"ACTIVE\") { promotionId promotionName status { statusName } } }"}'
+
+# Dashboard completo con todos los estados
+Invoke-WebRequest -Uri "http://localhost:8080/graphql" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"query":"{ activas: promotionsActive { promotionId promotionName } expiradas: promotionsExpired { promotionId promotionName } programadas: promotionsScheduled { promotionId promotionName } }"}'
+```
+
+**Ejemplo con PowerShell - JWT para consultas protegidas**:
 ```powershell
 # 1. Login para obtener JWT
 $loginResponse = Invoke-WebRequest -Uri "http://localhost:8080/graphql" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"query":"mutation { login(email: \"alice@example.com\", password: \"password123\") { success token } }"}'
@@ -1406,7 +1536,4 @@ Para problemas o preguntas:
 Desarrollado para el sistema de promociones de Petstore con tecnologías modernas de Spring Boot y GraphQL.
 
 **Versión**: 0.0.1-SNAPSHOT  
-
-**Última actualización**: octubre 2025 
-
-
+**Última actualización**: octubre 2025
