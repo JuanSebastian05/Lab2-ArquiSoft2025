@@ -1,5 +1,7 @@
 package com.petstore.backend.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +18,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     private final CorsConfigurationSource corsConfigurationSource;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -79,10 +83,12 @@ public class SecurityConfig {
                                           activeProfiles.length == 0; // Por defecto desarrollo
                     
                     // Log del modo detectado
-                    System.out.println("🔍 Security Mode Detection:");
-                    System.out.println("   Active Profiles: " + java.util.Arrays.toString(activeProfiles));
-                    System.out.println("   Is Production: " + isProduction);
-                    System.out.println("   Is Development: " + isDevelopment);
+                    if (log.isInfoEnabled()) {
+                        log.info("🔍 Security Mode Detection:");
+                        log.info("   Active Profiles: {}", java.util.Arrays.toString(activeProfiles));
+                        log.info("   Is Production: {}", isProduction);
+                        log.info("   Is Development: {}", isDevelopment);
+                    }
                     
                     // GraphiQL y GraphQL SIEMPRE PÚBLICOS (tanto dev como prod)
                     authz.requestMatchers("/graphiql", "/graphiql/**").permitAll();

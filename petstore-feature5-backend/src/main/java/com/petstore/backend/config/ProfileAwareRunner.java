@@ -25,22 +25,28 @@ public class ProfileAwareRunner implements CommandLineRunner {
         String[] defaultProfiles = environment.getDefaultProfiles();
         
         // Debug logging
-        log.debug("Active profiles: {}", Arrays.toString(activeProfiles));
-        log.debug("Default profiles: {}", Arrays.toString(defaultProfiles));
+        if (log.isDebugEnabled()) {
+            log.debug("Active profiles: {}", Arrays.toString(activeProfiles));
+            log.debug("Default profiles: {}", Arrays.toString(defaultProfiles));
+        }
         
         log.info("============================================");
         log.info("PETSTORE BACKEND - PERFIL DE SEGURIDAD");
         log.info("============================================");
         
         if (activeProfiles.length == 0) {
-            log.info("✓ Perfiles activos: {} (default)", Arrays.toString(defaultProfiles));
+            if (log.isInfoEnabled()) {
+                log.info("✓ Perfiles activos: {} (default)", Arrays.toString(defaultProfiles));
+            }
             log.info("✓ Modo: DESARROLLO");
             log.info("✓ GraphiQL: http://localhost:8080/graphiql");
             log.info("✓ GraphQL: http://localhost:8080/graphql (PÚBLICO)");
             log.info("✓ H2 Console: Habilitado");
             log.info("✓ Actuator: Todos los endpoints");
         } else {
-            log.info("✓ Perfiles activos: {}", Arrays.toString(activeProfiles));
+            if (log.isInfoEnabled()) {
+                log.info("✓ Perfiles activos: {}", Arrays.toString(activeProfiles));
+            }
             
             boolean isDev = Arrays.asList(activeProfiles).contains("dev");
             boolean isProd = Arrays.asList(activeProfiles).contains("prod");

@@ -3,10 +3,13 @@ package com.petstore.backend.graphql;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -26,6 +29,8 @@ import com.petstore.backend.service.PromotionService;
 
 @Controller
 public class GraphQLResolver {
+
+    private static final Logger log = LoggerFactory.getLogger(GraphQLResolver.class);
 
     private final PromotionService promotionService;
     private final AuthService authService;
@@ -58,7 +63,7 @@ public class GraphQLResolver {
     private void requireAuthentication() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
-            throw new RuntimeException("Authentication required. Please provide a valid JWT token.");
+            throw new AccessDeniedException("Authentication required. Please provide a valid JWT token.");
         }
     }
 
@@ -83,7 +88,7 @@ public class GraphQLResolver {
         try {
             return promotionRepository.findAll();
         } catch (Exception e) {
-            System.err.println("Error getting all promotions: " + e.getMessage());
+            log.error("Error getting all promotions: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -94,7 +99,7 @@ public class GraphQLResolver {
         try {
             return promotionService.getAllActivePromotionsEntities();
         } catch (Exception e) {
-            System.err.println("Error getting active promotions: " + e.getMessage());
+            log.error("Error getting active promotions: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -105,7 +110,7 @@ public class GraphQLResolver {
         try {
             return promotionService.getAllExpiredPromotionsEntities();
         } catch (Exception e) {
-            System.err.println("Error getting expired promotions: " + e.getMessage());
+            log.error("Error getting expired promotions: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -116,7 +121,7 @@ public class GraphQLResolver {
         try {
             return promotionService.getAllScheduledPromotionsEntities();
         } catch (Exception e) {
-            System.err.println("Error getting scheduled promotions: " + e.getMessage());
+            log.error("Error getting scheduled promotions: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -127,7 +132,7 @@ public class GraphQLResolver {
         try {
             return promotionService.getPromotionsByStatusEntities(statusName);
         } catch (Exception e) {
-            System.err.println("Error getting promotions by status: " + e.getMessage());
+            log.error("Error getting promotions by status: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -138,7 +143,7 @@ public class GraphQLResolver {
         try {
             return promotionService.getPromotionsByCategoryEntities(categoryId);
         } catch (Exception e) {
-            System.err.println("Error getting promotions by category: " + e.getMessage());
+            log.error("Error getting promotions by category: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -149,7 +154,7 @@ public class GraphQLResolver {
         try {
             return promotionRepository.findById(id).orElse(null);
         } catch (Exception e) {
-            System.err.println("Error getting promotion by id: " + e.getMessage());
+            log.error("Error getting promotion by id: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -160,7 +165,7 @@ public class GraphQLResolver {
         try {
             return categoryRepository.findAll();
         } catch (Exception e) {
-            System.err.println("Error getting categories: " + e.getMessage());
+            log.error("Error getting categories: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -171,7 +176,7 @@ public class GraphQLResolver {
         try {
             return categoryRepository.findById(id).orElse(null);
         } catch (Exception e) {
-            System.err.println("Error getting category by id: " + e.getMessage());
+            log.error("Error getting category by id: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -182,7 +187,7 @@ public class GraphQLResolver {
         try {
             return productRepository.findAll();
         } catch (Exception e) {
-            System.err.println("Error getting products: " + e.getMessage());
+            log.error("Error getting products: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -193,7 +198,7 @@ public class GraphQLResolver {
         try {
             return productRepository.findByCategoryCategoryId(categoryId);
         } catch (Exception e) {
-            System.err.println("Error getting products by category: " + e.getMessage());
+            log.error("Error getting products by category: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -204,7 +209,7 @@ public class GraphQLResolver {
         try {
             return productRepository.findById(id).orElse(null);
         } catch (Exception e) {
-            System.err.println("Error getting product by id: " + e.getMessage());
+            log.error("Error getting product by id: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -214,15 +219,15 @@ public class GraphQLResolver {
     @MutationMapping
     public LoginResponse login(@Argument String email, @Argument String password) {
         try {
-            System.out.println("GraphQL Login attempt for email: " + email);
+            log.info("GraphQL Login attempt for email: {}", email);
             
             // Usar AuthService para generar JWT real (igual que REST)
             LoginResponse response = authService.authenticateMarketingAdmin(email, password);
-            System.out.println("GraphQL Login successful, using real JWT token");
+            log.info("GraphQL Login successful, using real JWT token");
             return response;
             
         } catch (Exception e) {
-            System.err.println("Error in GraphQL login: " + e.getMessage());
+            log.error("Error in GraphQL login: {}", e.getMessage(), e);
             LoginResponse response = new LoginResponse();
             response.setSuccess(false);
             response.setMessage("Invalid credentials or authentication error");
@@ -236,7 +241,7 @@ public class GraphQLResolver {
     public Promotion createPromotion(@Argument PromotionDTO input) {
         requireAuthentication();
         try {
-            System.out.println("Creating promotion with input: " + input);
+            log.info("Creating promotion with input: {}", input);
             
             // Usar el método existente createPromotion del service
             return promotionService.createPromotion(
@@ -250,9 +255,8 @@ public class GraphQLResolver {
                 input.getCategory() != null ? input.getCategory().getCategoryId() : null
             );
         } catch (Exception e) {
-            System.err.println("Error creating promotion: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Failed to create promotion: " + e.getMessage());
+            log.error("Error creating promotion: {}", e.getMessage(), e);
+            throw new IllegalStateException("Failed to create promotion: " + e.getMessage(), e);
         }
     }
 
@@ -260,7 +264,7 @@ public class GraphQLResolver {
     public Promotion updatePromotion(@Argument Integer id, @Argument PromotionDTO input) {
         requireAuthentication();
         try {
-            System.out.println("Updating promotion " + id + " with input: " + input);
+            log.info("Updating promotion {} with input: {}", id, input);
             
             // Usar el método existente updatePromotion del service
             Promotion updated = promotionService.updatePromotion(
@@ -279,9 +283,8 @@ public class GraphQLResolver {
             
             return updated;
         } catch (Exception e) {
-            System.err.println("Error updating promotion: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Failed to update promotion: " + e.getMessage());
+            log.error("Error updating promotion: {}", e.getMessage(), e);
+            throw new IllegalStateException("Failed to update promotion: " + e.getMessage(), e);
         }
     }
 
@@ -289,19 +292,18 @@ public class GraphQLResolver {
     public Boolean deletePromotion(@Argument Integer id) {
         requireAuthentication();
         try {
-            System.out.println("Deleting promotion with id: " + id);
+            log.info("Deleting promotion with id: {}", id);
             
             boolean deleted = promotionService.deletePromotion(id);
             
             if (!deleted) {
-                throw new RuntimeException("Promotion not found with id: " + id);
+                throw new IllegalArgumentException("Promotion not found with id: " + id);
             }
             
             return true;
         } catch (Exception e) {
-            System.err.println("Error deleting promotion: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Failed to delete promotion: " + e.getMessage());
+            log.error("Error deleting promotion: {}", e.getMessage(), e);
+            throw new IllegalStateException("Failed to delete promotion: " + e.getMessage(), e);
         }
     }
 
@@ -314,7 +316,7 @@ public class GraphQLResolver {
         try {
             return productRepository.findByPromotionPromotionId(promotion.getPromotionId());
         } catch (Exception e) {
-            System.err.println("Error getting products for promotion: " + e.getMessage());
+            log.error("Error getting products for promotion: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -324,7 +326,7 @@ public class GraphQLResolver {
         try {
             return promotionService.getPromotionsByCategoryEntities(category.getCategoryId());
         } catch (Exception e) {
-            System.err.println("Error getting promotions for category: " + e.getMessage());
+            log.error("Error getting promotions for category: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
@@ -334,7 +336,7 @@ public class GraphQLResolver {
         try {
             return productRepository.findByCategoryCategoryId(category.getCategoryId());
         } catch (Exception e) {
-            System.err.println("Error getting products for category: " + e.getMessage());
+            log.error("Error getting products for category: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
