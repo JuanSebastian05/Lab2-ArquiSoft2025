@@ -237,4 +237,73 @@ class PromotionServiceTest {
         List<Promotion> entities = promotionService.getAllActivePromotionsEntities();
         assertThat(entities).extracting(Promotion::getPromotionId).containsExactly(1);
     }
+
+    @Test
+    @DisplayName("getAllExpiredPromotionsEntities delega en repository")
+    void getAllExpiredPromotionsEntities_delegates() {
+        LocalDate today = LocalDate.now();
+        Promotion expired = promo(11, "E", "d", today.minusDays(5), today.minusDays(1), 10.0, status(2, "EXPIRED"), null, null);
+        given(promotionRepository.findExpiredPromotions()).willReturn(List.of(expired));
+
+        List<Promotion> res = promotionService.getAllExpiredPromotionsEntities();
+        assertThat(res).hasSize(1);
+        assertThat(res.get(0).getPromotionId()).isEqualTo(11);
+        verify(promotionRepository).findExpiredPromotions();
+    }
+
+    @Test
+    @DisplayName("getAllScheduledPromotionsEntities delega en repository")
+    void getAllScheduledPromotionsEntities_delegates() {
+        LocalDate today = LocalDate.now();
+        Promotion scheduled = promo(12, "S", "d", today.plusDays(5), today.plusDays(10), 10.0, status(3, "SCHEDULED"), null, null);
+        given(promotionRepository.findScheduledPromotions()).willReturn(List.of(scheduled));
+
+        List<Promotion> res = promotionService.getAllScheduledPromotionsEntities();
+        assertThat(res).hasSize(1);
+        verify(promotionRepository).findScheduledPromotions();
+    }
+
+    @Test
+    @DisplayName("getPromotionsByStatusEntities delega en repository.findByStatusName")
+    void getPromotionsByStatusEntities_delegates() {
+        given(promotionRepository.findByStatusName("ACTIVE")).willReturn(List.of(
+            promo(13, "AS", "d", LocalDate.now(), LocalDate.now().plusDays(1), 10.0, status(1, "ACTIVE"), null, null)
+        ));
+
+        List<Promotion> res = promotionService.getPromotionsByStatusEntities("ACTIVE");
+        assertThat(res).hasSize(1);
+        verify(promotionRepository).findByStatusName("ACTIVE");
+    }
+
+    @Test
+    @DisplayName("getPromotionsByCategoryEntities delega en repository.findByCategoryCategoryId")
+    void getPromotionsByCategoryEntities_delegates() {
+        given(promotionRepository.findByCategoryCategoryId(7)).willReturn(List.of(
+            promo(14, "PC", "d", LocalDate.now(), LocalDate.now().plusDays(1), 10.0, status(1, "ACTIVE"), null, category(7, "Test", "d"))
+        ));
+
+        List<Promotion> res = promotionService.getPromotionsByCategoryEntities(7);
+        assertThat(res).hasSize(1);
+        verify(promotionRepository).findByCategoryCategoryId(7);
+    }
+
+    @Test
+    @DisplayName("getPromotionByIdEntity retorna entidad cuando existe")
+    void getPromotionByIdEntity_returnsWhenExists() {
+        Promotion p = promo(15, "PE", "d", LocalDate.now(), LocalDate.now().plusDays(1), 10.0, status(1, "ACTIVE"), null, null);
+        given(promotionRepository.findById(15)).willReturn(Optional.of(p));
+
+        Promotion res = promotionService.getPromotionByIdEntity(15);
+        assertThat(res).isSameAs(p);
+        verify(promotionRepository).findById(15);
+    }
+
+    @Test
+    @DisplayName("getPromotionByIdEntity retorna null cuando no existe")
+    void getPromotionByIdEntity_returnsNullWhenMissing() {
+        given(promotionRepository.findById(99)).willReturn(Optional.empty());
+        Promotion res = promotionService.getPromotionByIdEntity(99);
+        assertThat(res).isNull();
+    }
 }
+

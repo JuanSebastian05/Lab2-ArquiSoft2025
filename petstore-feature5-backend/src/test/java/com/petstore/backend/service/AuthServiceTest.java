@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.petstore.backend.dto.LoginResponse;
 import com.petstore.backend.entity.Role;
@@ -130,4 +132,61 @@ class AuthServiceTest {
         assertThat(map.get("token")).isEqualTo("");
         assertThat(map.get("user")).isInstanceOf(HashMap.class);
     }
+
+    @Test
+    void loadUserByUsername_success_returnsUserDetails() {
+        String email = "alice@example.com";
+        User user = buildMarketingAdmin(email, "password123");
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+        UserDetails ud = authService.loadUserByUsername(email);
+        assertThat(ud.getUsername()).isEqualTo(email);
+        assertThat(ud.getPassword()).isEqualTo("password123");
+        assertThat(ud.getAuthorities()).hasSize(1);
+    }
+
+    @Test
+    void loadUserByUsername_notFound_throws() {
+        when(userRepository.findByEmail("none@example.com")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> authService.loadUserByUsername("none@example.com"))
+            .isInstanceOf(UsernameNotFoundException.class)
+            .hasMessageContaining("Usuario no encontrado");
+    }
+
+    @Test
+    void isMarketingAdmin_returnsTrue_whenFound() {
+        when(userRepository.findMarketingAdminByEmail("admin@example.com"))
+                .thenReturn(Optional.of(buildMarketingAdmin("admin@example.com", "x")));
+        assertThat(authService.isMarketingAdmin("admin@example.com")).isTrue();
+    }
+
+    @Test
+    void isMarketingAdmin_returnsFalse_whenNotFound() {
+        when(userRepository.findMarketingAdminByEmail("noone@example.com")).thenReturn(Optional.empty());
+        assertThat(authService.isMarketingAdmin("noone@example.com")).isFalse();
+    }
+
+    @Test
+    void getUserFromToken_invalidToken_throws() {
+        when(jwtUtil.validateToken("bad")).thenReturn(false);
+        assertThatThrownBy(() -> authService.getUserFromToken("bad"))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Token inválido");
+    }
+
+    @Test
+    void authenticateMarketingAdmin_notFound_throws() {
+        when(userRepository.findMarketingAdminByEmail("none@example.com")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> authService.authenticateMarketingAdmin("none@example.com", "x"))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Usuario no encontrado");
+    }
+
+    @Test
+    void validateToken_exception_returnsFalse() {
+        when(jwtUtil.validateToken("bad")).thenThrow(new RuntimeException("Invalid"));
+        assertThat(authService.validateToken("bad")).isFalse();
+    }
 }
+
