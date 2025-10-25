@@ -1,4 +1,4 @@
-[![CI - Maven build & tests](https://github.com/JuanSebastian05/Lab2-ArquiSoft2025/actions/workflows/build.yml/badge.svg)](https://github.com/JuanSebastian05/Lab2-ArquiSoft2025/actions/workflows/build.yml)
+[![CI/CD - Maven build & tests](https://github.com/JuanSebastian05/Lab2-ArquiSoft2025/actions/workflows/build.yml/badge.svg)](https://github.com/JuanSebastian05/Lab2-ArquiSoft2025/actions/workflows/build.yml)
 
 # 🛍️ Petstore Feature 5 Backend
 
