@@ -74,6 +74,27 @@ jobs:
       - name: Show Java version
         run: java -version
 
+      - name: Debug Java environment (before Sonar)
+        run: |
+          echo "PATH=$PATH"
+          echo "which java: $(which java)"
+          echo "JAVA_HOME=$JAVA_HOME"
+          java -version || true
+          javac -version || true
+          ./mvnw -v || true
+
+      - name: Ensure JAVA_HOME is set for Maven
+        run: |
+          # Compute JAVA_HOME from the java binary and export it for subsequent steps
+          JAVA_BIN=$(readlink -f "$(which java)" 2>/dev/null || true)
+          if [ -n "$JAVA_BIN" ]; then
+            JAVA_HOME=$(dirname $(dirname "$JAVA_BIN"))
+            echo "JAVA_HOME computed as: $JAVA_HOME"
+            echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
+          else
+            echo "Could not compute JAVA_HOME (which java returned empty)"
+          fi
+
       - name: Analyze with SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -84,5 +105,5 @@ jobs:
             exit 0;
           fi
           # Run Maven verify + Sonar. Update sonar.projectKey and sonar.organization to match your SonarCloud setup.
-          ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=JuanSebastian05_Lab2-ArquiSoft2025 -Dsonar.organization=juansebastian05-1 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${SONAR_TOKEN}
+          ./mvnw -B -e verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=JuanSebastian05_Lab2-ArquiSoft2025 -Dsonar.organization=juansebastian05-1 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${SONAR_TOKEN}
  
