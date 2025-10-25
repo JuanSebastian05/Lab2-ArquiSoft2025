@@ -34,7 +34,6 @@ build/
 
 ### variables ###
 .env
-.env.example
 
 # carpea target
 target/

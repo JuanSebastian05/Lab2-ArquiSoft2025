@@ -2,11 +2,21 @@ package com.petstore.backend.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
+@SpringBootTest
+@TestPropertySource(properties = {
+    "jwt.secret=TestSecretKeyForJWTMustBe32CharsMin",
+    "jwt.expiration=86400000"
+})
 class JwtUtilTest {
 
-    private final JwtUtil jwtUtil = new JwtUtil();
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Test
     void generate_and_validate_token() {
