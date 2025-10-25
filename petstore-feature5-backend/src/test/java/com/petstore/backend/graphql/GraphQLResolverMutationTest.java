@@ -118,4 +118,89 @@ class GraphQLResolverMutationTest {
             .isInstanceOf(RuntimeException.class)
             .hasMessageContaining("not found");
     }
+
+    @Test
+    void login_successfulAuthentication_returnsLoginResponse() {
+        // Arrange
+        com.petstore.backend.dto.LoginResponse mockResponse = new com.petstore.backend.dto.LoginResponse();
+        mockResponse.setSuccess(true);
+        mockResponse.setToken("jwt-token-123");
+        mockResponse.setMessage("Login successful");
+        
+        when(authService.authenticateMarketingAdmin("admin@test.com", "password123"))
+            .thenReturn(mockResponse);
+
+        // Act
+        com.petstore.backend.dto.LoginResponse result = resolver.login("admin@test.com", "password123");
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getToken()).isEqualTo("jwt-token-123");
+    }
+
+    @Test
+    void login_failedAuthentication_returnsErrorResponse() {
+        // Arrange
+        when(authService.authenticateMarketingAdmin("wrong@test.com", "wrongpass"))
+            .thenThrow(new RuntimeException("Invalid credentials"));
+
+        // Act
+        com.petstore.backend.dto.LoginResponse result = resolver.login("wrong@test.com", "wrongpass");
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.isSuccess()).isFalse();
+        assertThat(result.getMessage()).contains("Invalid credentials");
+    }
+
+    @Test
+    void createPromotion_withoutCategory_stillWorks() {
+        Promotion expected = new Promotion();
+        expected.setPromotionId(2);
+        when(promotionService.createPromotion(
+            any(), any(), any(LocalDate.class), any(LocalDate.class), any(Double.class), any(Integer.class), any(Integer.class), eq(null)
+        )).thenReturn(expected);
+
+        PromotionDTO dto = buildDto(null); // No category
+        Promotion result = resolver.createPromotion(dto);
+        assertThat(result).isNotNull();
+        assertThat(result.getPromotionId()).isEqualTo(2);
+    }
+
+    @Test
+    void updatePromotion_withoutCategory_stillWorks() {
+        Promotion updated = new Promotion();
+        updated.setPromotionId(10);
+        when(promotionService.updatePromotion(
+            eq(10), any(), any(), any(LocalDate.class), any(LocalDate.class), any(Double.class), any(Integer.class), any(Integer.class), eq(null)
+        )).thenReturn(updated);
+
+        PromotionDTO dto = buildDto(null); // No category
+        Promotion res = resolver.updatePromotion(10, dto);
+        assertThat(res).isNotNull();
+        assertThat(res.getPromotionId()).isEqualTo(10);
+    }
+
+    @Test
+    void createPromotion_whenServiceThrows_propagatesException() {
+        when(promotionService.createPromotion(any(), any(), any(), any(), any(), any(), any(), any()))
+            .thenThrow(new RuntimeException("Database error"));
+
+        PromotionDTO dto = buildDto(1);
+        assertThatThrownBy(() -> resolver.createPromotion(dto))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Failed to create promotion");
+    }
+
+    @Test
+    void updatePromotion_whenServiceThrows_propagatesException() {
+        when(promotionService.updatePromotion(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+            .thenThrow(new RuntimeException("Not found"));
+
+        PromotionDTO dto = buildDto(1);
+        assertThatThrownBy(() -> resolver.updatePromotion(99, dto))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Failed to update promotion");
+    }
 }

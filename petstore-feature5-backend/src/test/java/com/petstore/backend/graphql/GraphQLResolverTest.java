@@ -126,4 +126,149 @@ class GraphQLResolverTest {
         Promotion res2 = resolver.promotion(2);
         assertThat(res2).isNull();
     }
+
+    @Test
+    void promotionsExpired_callsServiceAndReturnsList() {
+        Promotion p = org.mockito.Mockito.mock(Promotion.class);
+        when(promotionService.getAllExpiredPromotionsEntities()).thenReturn(List.of(p));
+
+        List<Promotion> result = resolver.promotionsExpired();
+
+        assertThat(result).hasSize(1);
+        verify(promotionService).getAllExpiredPromotionsEntities();
+    }
+
+    @Test
+    void promotionsScheduled_callsServiceAndReturnsList() {
+        Promotion p = org.mockito.Mockito.mock(Promotion.class);
+        when(promotionService.getAllScheduledPromotionsEntities()).thenReturn(List.of(p));
+
+        List<Promotion> result = resolver.promotionsScheduled();
+
+        assertThat(result).hasSize(1);
+        verify(promotionService).getAllScheduledPromotionsEntities();
+    }
+
+    @Test
+    void promotionsByStatus_callsServiceWithStatusName() {
+        Promotion p = org.mockito.Mockito.mock(Promotion.class);
+        when(promotionService.getPromotionsByStatusEntities("ACTIVE")).thenReturn(List.of(p));
+
+        List<Promotion> result = resolver.promotionsByStatus("ACTIVE");
+
+        assertThat(result).hasSize(1);
+        verify(promotionService).getPromotionsByStatusEntities("ACTIVE");
+    }
+
+    @Test
+    void promotionsByCategory_callsServiceWithCategoryId() {
+        Promotion p = org.mockito.Mockito.mock(Promotion.class);
+        when(promotionService.getPromotionsByCategoryEntities(5)).thenReturn(List.of(p));
+
+        List<Promotion> result = resolver.promotionsByCategory(5);
+
+        assertThat(result).hasSize(1);
+        verify(promotionService).getPromotionsByCategoryEntities(5);
+    }
+
+    @Test
+    void categories_returnsListFromRepository() {
+        com.petstore.backend.entity.Category cat = org.mockito.Mockito.mock(com.petstore.backend.entity.Category.class);
+        when(categoryRepository.findAll()).thenReturn(List.of(cat));
+
+        List<com.petstore.backend.entity.Category> result = resolver.categories();
+
+        assertThat(result).hasSize(1);
+        verify(categoryRepository).findAll();
+    }
+
+    @Test
+    void category_byId_returnsCategoryOrNull() {
+        com.petstore.backend.entity.Category cat = org.mockito.Mockito.mock(com.petstore.backend.entity.Category.class);
+        when(categoryRepository.findById(1)).thenReturn(Optional.of(cat));
+
+        com.petstore.backend.entity.Category res = resolver.category(1);
+        assertThat(res).isNotNull();
+
+        when(categoryRepository.findById(2)).thenReturn(Optional.empty());
+        com.petstore.backend.entity.Category res2 = resolver.category(2);
+        assertThat(res2).isNull();
+    }
+
+    @Test
+    void products_returnsListFromRepository() {
+        com.petstore.backend.entity.Product prod = org.mockito.Mockito.mock(com.petstore.backend.entity.Product.class);
+        when(productRepository.findAll()).thenReturn(List.of(prod));
+
+        List<com.petstore.backend.entity.Product> result = resolver.products();
+
+        assertThat(result).hasSize(1);
+        verify(productRepository).findAll();
+    }
+
+    @Test
+    void productsByCategory_callsRepositoryWithCategoryId() {
+        com.petstore.backend.entity.Product prod = org.mockito.Mockito.mock(com.petstore.backend.entity.Product.class);
+        when(productRepository.findByCategoryCategoryId(3)).thenReturn(List.of(prod));
+
+        List<com.petstore.backend.entity.Product> result = resolver.productsByCategory(3);
+
+        assertThat(result).hasSize(1);
+        verify(productRepository).findByCategoryCategoryId(3);
+    }
+
+    @Test
+    void product_byId_returnsProductOrNull() {
+        com.petstore.backend.entity.Product prod = org.mockito.Mockito.mock(com.petstore.backend.entity.Product.class);
+        when(productRepository.findById(1)).thenReturn(Optional.of(prod));
+
+        com.petstore.backend.entity.Product res = resolver.product(1);
+        assertThat(res).isNotNull();
+
+        when(productRepository.findById(2)).thenReturn(Optional.empty());
+        com.petstore.backend.entity.Product res2 = resolver.product(2);
+        assertThat(res2).isNull();
+    }
+
+    @Test
+    void promotionProducts_resolvesProductsForPromotion() {
+        Promotion promo = org.mockito.Mockito.mock(Promotion.class);
+        when(promo.getPromotionId()).thenReturn(10);
+        
+        com.petstore.backend.entity.Product prod = org.mockito.Mockito.mock(com.petstore.backend.entity.Product.class);
+        when(productRepository.findByPromotionPromotionId(10)).thenReturn(List.of(prod));
+
+        List<com.petstore.backend.entity.Product> result = resolver.promotionProducts(promo);
+
+        assertThat(result).hasSize(1);
+        verify(productRepository).findByPromotionPromotionId(10);
+    }
+
+    @Test
+    void categoryPromotions_resolvesPromotionsForCategory() {
+        com.petstore.backend.entity.Category cat = org.mockito.Mockito.mock(com.petstore.backend.entity.Category.class);
+        when(cat.getCategoryId()).thenReturn(7);
+        
+        Promotion promo = org.mockito.Mockito.mock(Promotion.class);
+        when(promotionService.getPromotionsByCategoryEntities(7)).thenReturn(List.of(promo));
+
+        List<Promotion> result = resolver.categoryPromotions(cat);
+
+        assertThat(result).hasSize(1);
+        verify(promotionService).getPromotionsByCategoryEntities(7);
+    }
+
+    @Test
+    void categoryProducts_resolvesProductsForCategory() {
+        com.petstore.backend.entity.Category cat = org.mockito.Mockito.mock(com.petstore.backend.entity.Category.class);
+        when(cat.getCategoryId()).thenReturn(8);
+        
+        com.petstore.backend.entity.Product prod = org.mockito.Mockito.mock(com.petstore.backend.entity.Product.class);
+        when(productRepository.findByCategoryCategoryId(8)).thenReturn(List.of(prod));
+
+        List<com.petstore.backend.entity.Product> result = resolver.categoryProducts(cat);
+
+        assertThat(result).hasSize(1);
+        verify(productRepository).findByCategoryCategoryId(8);
+    }
 }
