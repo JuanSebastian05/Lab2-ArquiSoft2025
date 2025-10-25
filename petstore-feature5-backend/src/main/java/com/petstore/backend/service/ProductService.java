@@ -2,7 +2,6 @@ package com.petstore.backend.service;
 
 
 import com.petstore.backend.entity.Product;
-import com.petstore.backend.repository.CategoryRepository;
 import com.petstore.backend.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,9 +16,6 @@ public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
-    
-    @Autowired
-    private CategoryRepository categoryRepository;
 
     /**
      * Encuentra todos los productos

@@ -3,7 +3,6 @@ package com.petstore.backend.controller;
 import com.petstore.backend.dto.CategoryDTO;
 import com.petstore.backend.dto.ProductDTO;
 import com.petstore.backend.entity.Product;
-import com.petstore.backend.mapper.MapperFacade;
 import com.petstore.backend.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +21,6 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
-    
-    @Autowired
-    private MapperFacade mapperFacade;
 
     /**
      * GET /api/products

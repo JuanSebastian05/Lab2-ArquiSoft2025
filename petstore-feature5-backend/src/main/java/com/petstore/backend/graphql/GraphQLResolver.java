@@ -61,15 +61,6 @@ public class GraphQLResolver {
             throw new RuntimeException("Authentication required. Please provide a valid JWT token.");
         }
     }
-    
-    /**
-     * Obtener usuario autenticado actual
-     */
-    private User getAuthenticatedUser() {
-        requireAuthentication();
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return userRepository.findByEmail(auth.getName()).orElse(null);
-    }
 
     // === QUERIES ===
 
