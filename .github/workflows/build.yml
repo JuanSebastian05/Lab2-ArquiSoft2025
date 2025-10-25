@@ -11,6 +11,9 @@ jobs:
   tests:
     name: Unit Tests (Java 21)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: petstore-feature5-backend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,4 +29,4 @@ jobs:
         run: java -version
 
       - name: Build and run tests (includes checkstyle)
-        run: mvn -B -V -U verify
+        run: ./mvnw -B -V -U verify
