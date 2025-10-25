@@ -28,6 +28,9 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<sonar.projectKey>JuanSebastian05_Lab2-ArquiSoft2025</sonar.projectKey>
+		<sonar.organization>juansebastian05-1</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 	<dependencies>
 		<dependency>
