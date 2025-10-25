@@ -34,6 +34,15 @@ jobs:
       - name: Build and run tests (includes checkstyle)
         run: ./mvnw -B -V -U verify
 
+      - name: Generate JaCoCo report
+        run: ./mvnw jacoco:report
+
+      - name: Upload JaCoCo report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: petstore-feature5-backend/target/site/jacoco
+
   sonar:
     # Depends on tests job
     needs: tests
@@ -105,5 +114,10 @@ jobs:
             exit 0;
           fi
           # Run Maven verify + Sonar. Update sonar.projectKey and sonar.organization to match your SonarCloud setup.
-          ./mvnw -B -e verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=JuanSebastian05_Lab2-ArquiSoft2025 -Dsonar.organization=juansebastian05-1 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${SONAR_TOKEN}
+          ./mvnw -B -e verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=JuanSebastian05_Lab2-ArquiSoft2025 \
+            -Dsonar.organization=juansebastian05-1 \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=${SONAR_TOKEN} \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
  
