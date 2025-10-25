@@ -19,7 +19,7 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     
     private final JwtUtil jwtUtil;
     private final AuthService authService;
@@ -55,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             } catch (Exception e) {
                 // Si hay error al cargar el usuario, continuar sin autenticar
-                logger.debug("No se pudo autenticar el usuario: " + e.getMessage());
+                log.debug("No se pudo autenticar el usuario: {}", e.getMessage());
             }
         }
 
