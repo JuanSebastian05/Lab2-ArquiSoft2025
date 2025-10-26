@@ -126,15 +126,12 @@ jobs:
     needs: sonar
     name: Build JAR artifact
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: petstore-feature5-backend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Make Maven wrapper executable
-        run: chmod +x ./mvnw
+        run: chmod +x ./petstore-feature5-backend/mvnw
 
       - name: Set up JDK 21 and cache Maven
         uses: actions/setup-java@v4
@@ -144,7 +141,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven (skip tests, already ran)
-        run: ./mvnw -B package -DskipTests
+        run: cd petstore-feature5-backend && ./mvnw -B package -DskipTests
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
@@ -159,7 +156,7 @@ jobs:
           image: juansnb/lab2-arquisoft2025
           tags: latest
           registry: docker.io
-          dockerfile: petstore-feature5-backend/Dockerfile
+          dockerfile: Dockerfile
           directory: petstore-feature5-backend
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
