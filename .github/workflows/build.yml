@@ -120,4 +120,37 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=${SONAR_TOKEN} \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+
+  build:
+    # Depends on sonar job
+    needs: sonar
+    name: Build JAR artifact
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: petstore-feature5-backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Make Maven wrapper executable
+        run: chmod +x ./mvnw
+
+      - name: Set up JDK 21 and cache Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build with Maven (skip tests, already ran)
+        run: ./mvnw -B package -DskipTests
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: petstore-backend-jar
+          path: petstore-feature5-backend/target/*.jar
+          retention-days: 7
+
  
