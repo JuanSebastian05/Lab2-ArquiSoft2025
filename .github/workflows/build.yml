@@ -139,15 +139,19 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: 'maven'
+          cache-dependency-path: 'petstore-feature5-backend/pom.xml'
 
       - name: Build with Maven (skip tests, already ran)
         run: cd petstore-feature5-backend && ./mvnw -B package -DskipTests
+
+      - name: Verify JAR was created
+        run: ls -la petstore-feature5-backend/target/
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
           name: petstore-backend-jar
-          path: petstore-feature5-backend/target/lab2-ArquiSoft-petstore.jar
+          path: petstore-feature5-backend/target/*.jar
           retention-days: 7
 
       - name: Log in to Docker Hub
