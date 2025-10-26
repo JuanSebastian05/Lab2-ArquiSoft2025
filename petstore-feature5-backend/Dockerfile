@@ -1,4 +1,4 @@
 FROM openjdk:21
 EXPOSE 8080
-ADD target/lab2-ArquiSoft-petstore.jar lab2-arquisoft2025-petstore.jar
-ENTRYPOINT ["java","-jar","/lab2-arquisoft2025-petstore.jar"]
+ADD target/Lab2-ArquiSoft2025.jar Lab2-ArquiSoft2025.jar
+ENTRYPOINT ["java","-jar","/Lab2-ArquiSoft2025.jar"]

@@ -241,7 +241,7 @@
                 </executions>
             </plugin>
 		</plugins>
-		<finalName>lab2-ArquiSoft-petstore</finalName>
+		<finalName>Lab2-ArquiSoft2025</finalName>
 	</build>
 
 </project>
