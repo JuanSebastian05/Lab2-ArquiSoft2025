@@ -169,6 +169,6 @@ jobs:
           context: ./petstore-feature5-backend
           file: ./petstore-feature5-backend/Dockerfile
           push: true
-          tags: juansnb/lab2-arquisoft2025:latest
-          cache-from: type=registry,ref=juansnb/lab2-arquisoft2025:buildcache
-          cache-to: type=registry,ref=juansnb/lab2-arquisoft2025:buildcache,mode=max
+          tags: juansn/lab2-arquisoft2025:latest
+          cache-from: type=registry,ref=juansn/lab2-arquisoft2025:buildcache
+          cache-to: type=registry,ref=juansn/lab2-arquisoft2025:buildcache,mode=max
