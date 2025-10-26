@@ -3,35 +3,37 @@ package com.petstore.backend.service;
 import com.petstore.backend.dto.CategoryDTO;
 import com.petstore.backend.dto.PromotionDTO;
 import com.petstore.backend.entity.Promotion;
-import com.petstore.backend.entity.Status;
-import com.petstore.backend.entity.User;
-import com.petstore.backend.entity.Category;
 import com.petstore.backend.repository.PromotionRepository;
 import com.petstore.backend.repository.StatusRepository;
 import com.petstore.backend.repository.UserRepository;
 import com.petstore.backend.repository.CategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PromotionService {
 
-    @Autowired
-    private PromotionRepository promotionRepository;
-    
-    @Autowired
-    private StatusRepository statusRepository;
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private static final Logger log = LoggerFactory.getLogger(PromotionService.class);
+
+    private final PromotionRepository promotionRepository;
+    private final StatusRepository statusRepository;
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
+
+    public PromotionService(PromotionRepository promotionRepository,
+                           StatusRepository statusRepository,
+                           UserRepository userRepository,
+                           CategoryRepository categoryRepository) {
+        this.promotionRepository = promotionRepository;
+        this.statusRepository = statusRepository;
+        this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
+    }
 
     /**
      * Obtiene todas las promociones activas y vigentes
@@ -46,7 +48,7 @@ public class PromotionService {
         return activePromotions.stream()
                 .filter(promotion -> !today.isBefore(promotion.getStartDate()) && !today.isAfter(promotion.getEndDate()))
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -57,7 +59,7 @@ public class PromotionService {
         
         return allPromotions.stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -68,7 +70,7 @@ public class PromotionService {
         
         return promotions.stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -80,7 +82,7 @@ public class PromotionService {
         
         return promotions.stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -144,7 +146,7 @@ public class PromotionService {
         // Filtrar las que están vigentes (fecha actual entre start y end)
         return activePromotions.stream()
                 .filter(promotion -> !today.isBefore(promotion.getStartDate()) && !today.isAfter(promotion.getEndDate()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -198,21 +200,8 @@ public class PromotionService {
         promotion.setEndDate(endDate);
         promotion.setDiscountValue(discountValue);
         
-        // Buscar y asignar entidades relacionadas
-        if (statusId != null) {
-            Status status = statusRepository.findById(statusId).orElse(null);
-            promotion.setStatus(status);
-        }
-        
-        if (userId != null) {
-            User user = userRepository.findById(userId).orElse(null);
-            promotion.setUser(user);
-        }
-        
-        if (categoryId != null) {
-            Category category = categoryRepository.findById(categoryId).orElse(null);
-            promotion.setCategory(category);
-        }
+        // Asignar entidades relacionadas usando helper method
+        setPromotionRelations(promotion, statusId, userId, categoryId);
         
         return promotionRepository.save(promotion);
     }
@@ -236,23 +225,28 @@ public class PromotionService {
         if (endDate != null) promotion.setEndDate(endDate);
         if (discountValue != null) promotion.setDiscountValue(discountValue);
         
-        // Actualizar entidades relacionadas
+        // Actualizar entidades relacionadas usando helper method
+        setPromotionRelations(promotion, statusId, userId, categoryId);
+        
+        return promotionRepository.save(promotion);
+    }
+
+    /**
+     * Helper method para asignar entidades relacionadas a una promoción
+     */
+    private void setPromotionRelations(Promotion promotion, Integer statusId, 
+                                      Integer userId, Integer categoryId) {
         if (statusId != null) {
-            Status status = statusRepository.findById(statusId).orElse(null);
-            promotion.setStatus(status);
+            statusRepository.findById(statusId).ifPresent(promotion::setStatus);
         }
         
         if (userId != null) {
-            User user = userRepository.findById(userId).orElse(null);
-            promotion.setUser(user);
+            userRepository.findById(userId).ifPresent(promotion::setUser);
         }
         
         if (categoryId != null) {
-            Category category = categoryRepository.findById(categoryId).orElse(null);
-            promotion.setCategory(category);
+            categoryRepository.findById(categoryId).ifPresent(promotion::setCategory);
         }
-        
-        return promotionRepository.save(promotion);
     }
 
     /**
@@ -266,7 +260,7 @@ public class PromotionService {
             }
             return false;
         } catch (Exception e) {
-            System.err.println("Error deleting promotion: " + e.getMessage());
+            log.error("Error deleting promotion: {}", e.getMessage(), e);
             return false;
         }
     }

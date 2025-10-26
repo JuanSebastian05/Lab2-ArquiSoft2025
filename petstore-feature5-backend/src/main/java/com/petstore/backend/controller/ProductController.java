@@ -4,7 +4,6 @@ import com.petstore.backend.dto.CategoryDTO;
 import com.petstore.backend.dto.ProductDTO;
 import com.petstore.backend.entity.Product;
 import com.petstore.backend.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,15 +11,17 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products")
 @CrossOrigin(origins = "*")
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
 
     /**
      * GET /api/products
@@ -32,7 +33,7 @@ public class ProductController {
             List<Product> products = productService.findAll();
             List<ProductDTO> productDTOs = products.stream()
                     .map(this::convertToDTO)
-                    .collect(Collectors.toList());
+                    .toList();
             return ResponseEntity.ok(productDTOs);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -49,7 +50,7 @@ public class ProductController {
             List<Product> products = productService.findByCategoryId(categoryId);
             List<ProductDTO> productDTOs = products.stream()
                     .map(this::convertToDTO)
-                    .collect(Collectors.toList());
+                    .toList();
             return ResponseEntity.ok(productDTOs);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -85,7 +86,7 @@ public class ProductController {
             List<Product> products = productService.findByNameContaining(name);
             List<ProductDTO> productDTOs = products.stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
             return ResponseEntity.ok(productDTOs);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -104,7 +105,7 @@ public class ProductController {
             List<Product> products = productService.findByPriceBetween(minPrice, maxPrice);
             List<ProductDTO> productDTOs = products.stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
             return ResponseEntity.ok(productDTOs);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
