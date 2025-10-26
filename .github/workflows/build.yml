@@ -150,7 +150,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: petstore-backend-jar
-          path: lab2-ArquiSoft-petstore/target/*.jar
+          path: petstore-feature5-backend/target/*.jar
           retention-days: 7
 
       - name: Build and push Docker image
@@ -159,7 +159,8 @@ jobs:
           image: juansnb/lab2-arquisoft-petstore
           tags: latest
           registry: docker.io
-          dockerfile: Dockerfile
+          dockerfile: petstore-feature5-backend/Dockerfile
+          directory: petstore-feature5-backend
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
