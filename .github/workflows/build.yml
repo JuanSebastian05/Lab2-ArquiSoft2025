@@ -160,6 +160,5 @@ jobs:
           tags: latest
           registry: docker.io
           dockerfile: Dockerfile
-          directory: petstore-feature5-backend
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
