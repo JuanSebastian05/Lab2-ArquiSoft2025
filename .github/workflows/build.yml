@@ -156,7 +156,7 @@ jobs:
       - name: Build & push Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
-          image: juansnb/lab2-arquisoft2025
+          image: juansn/lab2-arquisoft2025
           tags: latest
           registry: docker.io
           dockerfile: Dockerfile
