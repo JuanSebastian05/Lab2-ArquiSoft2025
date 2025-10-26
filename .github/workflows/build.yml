@@ -149,14 +149,14 @@ jobs:
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: petstore-backend-jar
-          path: petstore-feature5-backend/target/*.jar
+          name: lab2-arquisoft2025
+          path: traget/lab2-arquisoft2025.jar
           retention-days: 7
 
       - name: Build & push Docker image
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
-          image: juansn/petstore-backend-jar
+          image: juansn/lab2-arquisoft2025
           tags: latest
           registry: docker.io
           dockerfile: Dockerfile
