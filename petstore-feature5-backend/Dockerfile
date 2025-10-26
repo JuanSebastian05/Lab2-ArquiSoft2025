@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk-alpine
-WORKDIR /app
-COPY target/lab2-ArquiSoft-petstore.jar app.jar
-ENTRYPOINT ["java", "-jar", "app.jar"]
+FROM openjdk:21
+EXPOSE 8080
+ADD target/lab2-ArquiSoft-petstore.jar lab2-arquisoft2025.jar
+ENTRYPOINT ["java","-jar","/lab2-arquisoft2025.jar"]
