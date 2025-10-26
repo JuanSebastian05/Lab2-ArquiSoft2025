@@ -1,5 +1,19 @@
 [![CI/CD - Maven build & tests](https://github.com/JuanSebastian05/Lab2-ArquiSoft2025/actions/workflows/build.yml/badge.svg)](https://github.com/JuanSebastian05/Lab2-ArquiSoft2025/actions/workflows/build.yml)
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JuanSebastian05_Lab2-ArquiSoft2025&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=JuanSebastian05_Lab2-ArquiSoft2025)
+
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=JuanSebastian05_Lab2-ArquiSoft2025&metric=bugs)](https://sonarcloud.io/summary/new_code?id=JuanSebastian05_Lab2-ArquiSoft2025)
+
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JuanSebastian05_Lab2-ArquiSoft2025&metric=coverage)](https://sonarcloud.io/summary/new_code?id=JuanSebastian05_Lab2-ArquiSoft2025)
+
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JuanSebastian05_Lab2-ArquiSoft2025&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=JuanSebastian05_Lab2-ArquiSoft2025)
+
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JuanSebastian05_Lab2-ArquiSoft2025&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=JuanSebastian05_Lab2-ArquiSoft2025)
+
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JuanSebastian05_Lab2-ArquiSoft2025&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=JuanSebastian05_Lab2-ArquiSoft2025)
+
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=JuanSebastian05_Lab2-ArquiSoft2025&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=JuanSebastian05_Lab2-ArquiSoft2025)
+
 # 🛍️ Petstore Feature 5 Backend
 
 Sistema completo de promociones para petstore con autenticación JWT, API REST y GraphQL.
