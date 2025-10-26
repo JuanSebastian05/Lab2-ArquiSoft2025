@@ -241,7 +241,7 @@
                 </executions>
             </plugin>
 		</plugins>
-		<finalName>Lab2-ArquiSoft2025</finalName>
+		<finalName>lab2-ArquiSoft2025</finalName>
 	</build>
 
 </project>
